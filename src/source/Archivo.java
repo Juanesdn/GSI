@@ -11,7 +11,6 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public class Archivo {
 
     private String name;
@@ -38,35 +37,65 @@ public class Archivo {
         return false;
     }
 
-    void writeToFile(LinkedList<String> Records) {
+    void writeToFile(String[] lines) {
         Long timeSpent = System.nanoTime();
 
-        try {
-            FileOutputStream fos = new FileOutputStream(new File("Registros.txt"));
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
-
+        try{            
+        FileOutputStream fos = new FileOutputStream(new File("Registros.txt"));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+        
             try {
-                for (String record : Records) {
-                    bw.write(record);
+                for (String line : lines) {
+                    bw.write(line);
                     bw.newLine();
                 }
                 bw.close();
-            } catch (IOException ex) {
-                System.out.println("There was an error writing to the files");
+            } catch (Exception e) {
+                System.out.println("Hubo un error escribiendo en el archivo");
             }
-
-            System.out.println("Tiempo transcurrido para escribir registros en el archivo: " + (System.nanoTime() - timeSpent));
-        } catch (FileNotFoundException ex) {
-            System.out.println("There was an error writing to the files");
+        } catch (IOException ex){
+            System.out.println("Hubo un error encontrando el archivo");
         }
+        
+        System.out.println("Tiempo transcurrido para escribir registros en el archivo: " + (System.nanoTime() - timeSpent));
     }
 
-    LinkedList<String> readFile(File file) {
-        LinkedList<String> lines = new LinkedList();
+//    void writeToFile(LinkedList<String> Records) {
+//        Long timeSpent = System.nanoTime();
+//
+//        try {
+//            FileOutputStream fos = new FileOutputStream(new File("Registros.txt"));
+//            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+//
+//            try {
+//                for (String record : Records) {
+//                    bw.write(record);
+//                    bw.newLine();
+//                }
+//                bw.close();
+//            } catch (IOException ex) {
+//                System.out.println("There was an error writing to the files");
+//            }
+//
+//            System.out.println("Tiempo transcurrido para escribir registros en el archivo: " + (System.nanoTime() - timeSpent));
+//        } catch (FileNotFoundException ex) {
+//            System.out.println("There was an error writing to the files");
+//        }
+//    }
+    String[] readFile(File file) {
+        int lineCounter = 0, index = 0;
+        String[] lines = new String[100];
         try {
             Scanner scanner = new Scanner(new File("Registros.txt"));
             while (scanner.hasNextLine()) {
-                lines.add(scanner.nextLine());
+                lineCounter++;
+            }
+            scanner.close();
+            lines = new String[lineCounter];
+            scanner = new Scanner(new File("Registros.txt"));
+            while (scanner.hasNextLine()) {
+                lines[index] = scanner.nextLine();
+                index++;
             }
             scanner.close();
         } catch (FileNotFoundException ex) {
@@ -75,21 +104,17 @@ public class Archivo {
         return lines;
     }
 
-
     public String getName() {
         return name;
     }
-
 
     public void setName(String name) {
         this.name = name;
     }
 
- 
     public File getFile() {
         return file;
     }
-
 
     public void setFile(File file) {
         this.file = file;

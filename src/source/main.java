@@ -2,16 +2,9 @@ package source;
 
 import java.util.Scanner;
 
-/**
- *
- * @author Juanes
- */
+
 public class main {
 
-    /**
-     *
-     * @param args
-     */
     public static void main(String[] args) {
         int cantRegistros, cantCampos, longCampos;
 

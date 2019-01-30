@@ -1,7 +1,6 @@
 package source;
 
 import java.math.BigInteger;
-import java.util.LinkedList;
 import java.util.Random;
 
 public class Controller {
@@ -11,55 +10,68 @@ public class Controller {
     public Controller(Archivo archivo) {
         this.archivo = archivo;
     }
-    
-    void generateRecords(int cantRegistros, int cantCampos, int longCampos){
-        
-        LinkedList<String> records = new LinkedList();
-        LinkedList<String> pastRecords = archivo.readFile(archivo.getFile()); // Registros anteriores del archivo
-        String tempString;
-        
-        // Añade los registros anteriores al nuevo archivo
-        for (String line : pastRecords) {
-            records.add(line);
+
+    void generateRecords(int cantRegistros, int cantCampos, int longCampos) {
+        String line;
+
+        String[] records = new String[cantRegistros];
+        String[] pastRecords = archivo.readFile(archivo.getFile());
+
+        BigInteger[] keys = new BigInteger[cantRegistros];
+
+        QuickSort sorter = new QuickSort();
+
+        for (int i = 0; i < pastRecords.length; i++) {
+            String[] temp = pastRecords[i].split(";");
+            keys[i] = new BigInteger(temp[0]);
+            records[i] = pastRecords[i];
         }
-        
+
         for (int i = 0; i < cantRegistros; i++) {
-            tempString = generateKey().toString(); // Genera una llave unica (BigInteger)
-            
+            line = generateKey().toString();
+            keys[i] = new BigInteger(line);
+
             for (int j = 0; j < cantCampos; j++) {
-                // A los numeros pares les asigna un campo numerico y alos impares uno alfabético
-                if (j % 2 == 0){
-                    tempString = tempString + ";" + generateRandomInteger(longCampos);
-                }else{
-                    tempString = tempString + ";" + generateRandomCharacters(longCampos);
+                if (j % 2 == 0) {
+                    line = line + ";" + generateRandomInteger(longCampos);
+                } else {
+                    line = line + ";" + generateRandomCharacters(longCampos);
                 }
             }
-            
-            records.add(tempString);
+            System.out.println(line);
+            records[i] = line;
         }
-        archivo.writeToFile(records); // Escribe los registros en el archivo
+
+        sorter.sort(keys, records);
+
+        System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+        System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+        for (String record : records) {
+            System.out.println(record);
+        }
+
+        archivo.writeToFile(records);
+
     }
-    
-    int generateRandomInteger(int longCampo){
+
+    int generateRandomInteger(int longCampo) {
 
         Random rnd = new Random();
-        
-        int longitud = (int) Math.pow(10, longCampo-1);
-        int integer = rnd.nextInt(longitud*9) + longitud;
-        
+
+        int longitud = (int) Math.pow(10, longCampo - 1);
+        int integer = rnd.nextInt(longitud * 9) + longitud;
+
         return integer;
     }
-    
-    String generateRandomCharacters(int longCampo){
+
+    String generateRandomCharacters(int longCampo) {
         String characters = "";
         int rnd;
         String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         int cont = 0;
-        
-        while(longCampo > cont){
-            
-            rnd = (int) (Math.random()*25);
-            
+
+        while (longCampo > cont) {
+            rnd = (int) (Math.random() * 25);
             characters = characters + alphabet.charAt(rnd);
             cont++;
         }
@@ -70,14 +82,26 @@ public class Controller {
     BigInteger generateKey() {
         boolean Unique = false;
 
-        BigInteger key;
         Random rnd = new Random();
+
+        BigInteger key;
+        BigInteger lowerLimit = new BigInteger("99999999999999999999999");
         BigInteger upperLimit = new BigInteger("999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+        BigInteger tempBigInt = upperLimit.subtract(lowerLimit);
+
+        int maxNumBitLength = upperLimit.bitLength();
 
         while (Unique == false) {
-            key = new BigInteger(upperLimit.bitLength(), rnd);
+            key = new BigInteger(maxNumBitLength, rnd);
 
-            if (isUnique(key,archivo.readFile(archivo.getFile()))) {
+            if (key.compareTo(lowerLimit) < 0) {
+                key = key.add(lowerLimit);
+            }
+            if (key.compareTo(upperLimit) >= 0) {
+                key = key.mod(tempBigInt).add(lowerLimit);
+            }
+
+            if (isUnique(key, archivo.readFile(archivo.getFile()))) {
                 Unique = true;
                 return key;
             }
@@ -86,24 +110,24 @@ public class Controller {
         return BigInteger.ONE;
     }
 
-    boolean isUnique(BigInteger key, LinkedList<String> lines) {
+    boolean isUnique(BigInteger key, String[] lines) {
         for (String line : lines) {
-            String temp = key.toString();
-            if(line.contains(temp)){
+            String[] temp = line.split(";");
+            if (key.compareTo(new BigInteger(temp[0])) == 0) {
                 return false;
             }
         }
         return true;
     }
-    
-    int getNumberOfFields(){
-        String records = archivo.readFile(archivo.getFile()).getFirst();
+
+    int getNumberOfFields() {
+        String records = archivo.readFile(archivo.getFile())[0];
         String[] splitRecords = records.split(";");
         return splitRecords.length - 1;
     }
-    
-    int getFieldSize(){
-        String records = archivo.readFile(archivo.getFile()).getFirst();
+
+    int getFieldSize() {
+        String records = archivo.readFile(archivo.getFile())[0];
         String[] splitRecords = records.split(";");
         return splitRecords[1].length();
     }
