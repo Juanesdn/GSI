@@ -38,20 +38,11 @@ public class Controller {
                     line = line + ";" + generateRandomCharacters(longCampos);
                 }
             }
-            System.out.println(line);
             records[i] = line;
         }
 
         sorter.sort(keys, records);
-
-        System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
-        System.out.println("|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
-        for (String record : records) {
-            System.out.println(record);
-        }
-
         archivo.writeToFile(records);
-
     }
 
     int generateRandomInteger(int longCampo) {

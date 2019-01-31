@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,28 +59,6 @@ public class Archivo {
         System.out.println("Tiempo transcurrido para escribir registros en el archivo: " + (System.nanoTime() - timeSpent));
     }
 
-//    void writeToFile(LinkedList<String> Records) {
-//        Long timeSpent = System.nanoTime();
-//
-//        try {
-//            FileOutputStream fos = new FileOutputStream(new File("Registros.txt"));
-//            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
-//
-//            try {
-//                for (String record : Records) {
-//                    bw.write(record);
-//                    bw.newLine();
-//                }
-//                bw.close();
-//            } catch (IOException ex) {
-//                System.out.println("There was an error writing to the files");
-//            }
-//
-//            System.out.println("Tiempo transcurrido para escribir registros en el archivo: " + (System.nanoTime() - timeSpent));
-//        } catch (FileNotFoundException ex) {
-//            System.out.println("There was an error writing to the files");
-//        }
-//    }
     String[] readFile(File file) {
         int lineCounter = 0, index = 0;
         String[] lines = new String[100];
@@ -89,14 +66,17 @@ public class Archivo {
             Scanner scanner = new Scanner(new File("Registros.txt"));
             while (scanner.hasNextLine()) {
                 lineCounter++;
+                scanner.nextLine();
             }
             scanner.close();
             lines = new String[lineCounter];
+            
             scanner = new Scanner(new File("Registros.txt"));
             while (scanner.hasNextLine()) {
                 lines[index] = scanner.nextLine();
                 index++;
             }
+            
             scanner.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Archivo.class.getName()).log(Level.SEVERE, null, ex);

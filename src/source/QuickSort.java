@@ -10,6 +10,8 @@ public class QuickSort {
 
     public void sort(BigInteger[] keys, String[] lines) {
         // si el array es nulo o esta vacio se retorna
+        Long timeSpent = System.nanoTime();
+        
         if (keys == null || keys.length == 0) {
             return;
         }
@@ -17,6 +19,8 @@ public class QuickSort {
         this.lines = lines;
         length = keys.length;
         quicksort(0, length - 1);
+        
+        System.out.println("Tiempo transcurrido para ordenar las llaves unicas: " + (System.nanoTime() - timeSpent));
     }
 
     private void quicksort(int low, int high) {
