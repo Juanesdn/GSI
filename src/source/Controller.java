@@ -12,15 +12,20 @@ public class Controller {
     }
 
     void generateRecords(int cantRegistros, int cantCampos, int longCampos) {
+        /**
+         * Genera n cantidad de registros al azar, con k cantidad de campos y
+         * cada campo con longitud L.
+         */
         String line;
 
         String[] records = new String[cantRegistros];
-        String[] pastRecords = archivo.readFile(archivo.getFile());
+        String[] pastRecords = archivo.readFile();
 
         BigInteger[] keys = new BigInteger[cantRegistros];
 
-        QuickSort sorter = new QuickSort();
+        QuickSort sorter = new QuickSort(); // Objeto para ordenar con quicksort
 
+        // Adjunta los datos anteriores del archivo al nuevo arreglo.
         for (int i = 0; i < pastRecords.length; i++) {
             String[] temp = pastRecords[i].split(";");
             keys[i] = new BigInteger(temp[0]);
@@ -46,7 +51,10 @@ public class Controller {
     }
 
     int generateRandomInteger(int longCampo) {
-
+        /**
+         * Genera una combinación de numeros random dependiendo de la longitud
+         * del campo.
+         */
         Random rnd = new Random();
 
         int longitud = (int) Math.pow(10, longCampo - 1);
@@ -56,6 +64,9 @@ public class Controller {
     }
 
     String generateRandomCharacters(int longCampo) {
+        /**
+         * Genera un string random dependiendo de la longitud del campo.
+         */
         String characters = "";
         int rnd;
         String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -71,13 +82,16 @@ public class Controller {
     }
 
     BigInteger generateKey() {
+        /**
+         * Genera una llave (BigInteger) random para el archivo.
+         */
         boolean Unique = false;
 
         Random rnd = new Random();
 
         BigInteger key;
-        BigInteger lowerLimit = new BigInteger("99999999999999999999999");
-        BigInteger upperLimit = new BigInteger("999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+        BigInteger lowerLimit = new BigInteger("99999999999999999999999"); // limite inferior
+        BigInteger upperLimit = new BigInteger("999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"); // limite superior
         BigInteger tempBigInt = upperLimit.subtract(lowerLimit);
 
         int maxNumBitLength = upperLimit.bitLength();
@@ -92,7 +106,7 @@ public class Controller {
                 key = key.mod(tempBigInt).add(lowerLimit);
             }
 
-            if (isUnique(key, archivo.readFile(archivo.getFile()))) {
+            if (isUnique(key, archivo.readFile())) {
                 Unique = true;
                 return key;
             }
@@ -102,6 +116,9 @@ public class Controller {
     }
 
     boolean isUnique(BigInteger key, String[] lines) {
+        /**
+         * Retorna si una llave es unica.
+         */
         for (String line : lines) {
             String[] temp = line.split(";");
             if (key.compareTo(new BigInteger(temp[0])) == 0) {
@@ -111,14 +128,72 @@ public class Controller {
         return true;
     }
 
+    int searchString(String arr[], String value) {
+        /**
+         * Busca el dato dado por medio de una busqueda linear
+         */
+        int n = arr.length;
+
+        for (int i = 0; i < n; i++) {
+            if (arr[i].contains(value)) {
+                return i;
+            }
+
+        }
+        return -1;
+    }
+
+    int searchKey(BigInteger arr[], int l, int r, BigInteger x) {
+        /**
+         * Busca la llave dada por medio de busqueda binaria
+         */
+        if (r >= l) {
+            int mid = l + (r - l) / 2;
+
+            // Se verifica que el elemento este en la mitad
+            // del arreglo
+            if (arr[mid].compareTo(x) == 0) {
+                return mid;
+            }
+
+            // si el elemento es menor que el indice, el elemnto
+            // solo puede estar a la izquierda del arreglo
+            if (arr[mid].compareTo(x) > 0) {
+                return searchKey(arr, l, mid - 1, x);
+            }
+
+            // el elemento solamente puede estar presente a la izquierda
+            return searchKey(arr, mid + 1, r, x);
+        }
+
+        // Se llega aca solamente cuando el valor no esta presente
+        return -1;
+    }
+
+    void showResults(int pos, String[] lines) {
+        /**
+         * Muestra los resultados en la posición dada.
+         */
+        System.out.println("El dato fue encontrado en la posición " + pos);
+        System.out.println("|||||||||||||||||||||Datos contenidos|||||||||||||||||||||");
+        System.out.println(lines[pos]);
+        System.out.println("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||");
+    }
+
     int getNumberOfFields() {
-        String records = archivo.readFile(archivo.getFile())[0];
+        /**
+         * Retorna la cantidad de campos en el archivo
+         */
+        String records = archivo.readFile()[0];
         String[] splitRecords = records.split(";");
         return splitRecords.length - 1;
     }
 
     int getFieldSize() {
-        String records = archivo.readFile(archivo.getFile())[0];
+        /**
+         * Retorna el tamaño de un campo
+         */
+        String records = archivo.readFile()[0];
         String[] splitRecords = records.split(";");
         return splitRecords[1].length();
     }

@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.math.BigInteger;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,26 +18,28 @@ public class Archivo {
 
     public Archivo() {
         this.name = "Registros.txt";
+        this.file = new File(this.name);
     }
 
-    boolean createFile() {
-        File file = new File(this.name);
-
+    void createFile() {
+        /**
+         * Crea el archivo.
+         */
         try {
             if (file.createNewFile()) {
                 System.out.println("Archivo creado");
-                return true;
             } else {
                 System.out.println("El archivo ya existe (la cantidad de campos y su longitud serán iguales a los anteriores registros)");
-                return false;
             }
         } catch (IOException ex) {
             System.out.println("El archivo no pudo ser creado");
         }
-        return false;
     }
 
     void writeToFile(String[] lines) {
+        /**
+         * Escribe en el archivo.
+         */
         Long timeSpent = System.nanoTime();
 
         try{            
@@ -59,19 +62,15 @@ public class Archivo {
         System.out.println("Tiempo transcurrido para escribir registros en el archivo: " + (System.nanoTime() - timeSpent));
     }
 
-    String[] readFile(File file) {
-        int lineCounter = 0, index = 0;
-        String[] lines = new String[100];
+    String[] readFile() {
+        /**
+         * Lee el archivo y retorna un vector con las lineas de este.
+         */
+        int index = 0;
+        String[] lines = new String[getLines()];
         try {
-            Scanner scanner = new Scanner(new File("Registros.txt"));
-            while (scanner.hasNextLine()) {
-                lineCounter++;
-                scanner.nextLine();
-            }
-            scanner.close();
-            lines = new String[lineCounter];
+            Scanner scanner = new Scanner(file);
             
-            scanner = new Scanner(new File("Registros.txt"));
             while (scanner.hasNextLine()) {
                 lines[index] = scanner.nextLine();
                 index++;
@@ -82,6 +81,46 @@ public class Archivo {
             Logger.getLogger(Archivo.class.getName()).log(Level.SEVERE, null, ex);
         }
         return lines;
+    }
+    
+    int getLines() {
+        /**
+         * Retorna la cantidad de lineas del archivo.
+         */
+        int lineCounter = 0;
+        try {
+            Scanner scanner = new Scanner(file);
+            while (scanner.hasNextLine()){
+                lineCounter++;
+                scanner.nextLine();
+            }
+            scanner.close();
+            
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Archivo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return lineCounter;
+    }
+    
+    BigInteger[] getKeys() {
+        /**
+         * Retorna un arreglo con las llaves unicas.
+         */
+        int n = getLines();
+        
+        BigInteger[] keys = new BigInteger[n];
+        
+        String[] lines = readFile();
+        
+        for (int i = 0; i < n; i++) {
+            keys[i] = new BigInteger(lines[i].split(";")[0]);
+        }
+        
+        return keys;
+    }
+    
+    boolean exists(){
+        return file.exists();
     }
 
     public String getName() {
