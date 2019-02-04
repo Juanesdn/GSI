@@ -1,7 +1,11 @@
 package source;
 
+import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.Random;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Controller {
 
@@ -168,6 +172,110 @@ public class Controller {
 
         // Se llega aca solamente cuando el valor no esta presente
         return -1;
+    }
+
+    void mostrarCamposNumericos() {
+        /**
+         * Obtiene los campos numericos del archivo.
+         */
+        System.out.println("La posición de los campos numericos disponibles son:");
+        for (int i = 0; i < getNumberOfFields(); i++) {
+            if (i % 2 == 0) {
+                System.out.print(i + 1 + ", ");
+            }
+        }
+        System.out.println("");
+    }
+
+    int[] getNumericalField(int fieldPos) {
+        int[] numericalFields = new int[archivo.getLines()];
+        String[] registros = archivo.readFile();
+
+        for (int i = 0; i < registros.length; i++) {
+            String currentLine = registros[i];
+            String[] dividedLine = currentLine.split(";");
+
+            numericalFields[i] = Integer.valueOf(dividedLine[fieldPos]);
+        }
+
+        return numericalFields;
+    }
+
+    void calcularValorMaximo(int fieldPos) {
+        Long timeSpent = System.nanoTime();
+
+        int[] numericalFields = getNumericalField(fieldPos);
+        int maxValue = numericalFields[0];
+
+        for (int i = 1; i < numericalFields.length; i++) {
+            if (numericalFields[i] > maxValue) {
+                maxValue = numericalFields[i];
+            }
+        }
+
+        System.out.println("El valor maximo es " + maxValue);
+
+        System.out.println("Tiempo transcurrido para generar el valor maximo es : " + (System.nanoTime() - timeSpent));
+
+    }
+
+    void calcularValorMinimo(int fieldPos) {
+        Long timeSpent = System.nanoTime();
+
+        int[] numericalFields = getNumericalField(fieldPos);
+        int minValue = numericalFields[0];
+
+        for (int i = 1; i < numericalFields.length; i++) {
+            if (numericalFields[i] < minValue) {
+                minValue = numericalFields[i];
+            }
+        }
+
+        System.out.println("El valor minimo es " + minValue);
+
+        System.out.println("Tiempo transcurrido para generar el valor minimo es : " + (System.nanoTime() - timeSpent));
+    }
+
+    void calcularModa(int fieldPos) {
+        Long timeSpent = System.nanoTime();
+
+        int[] numericalFields = getNumericalField(fieldPos);
+        int moda = 0;
+        int maxNumRepeticiones = 0;
+
+        for (int i = 0; i < numericalFields.length; i++) {
+            int vecesQueSeRepite = 0;
+            for (int j = 0; j < numericalFields.length; j++) {
+                if (numericalFields[i] == numericalFields[j]) {
+                    vecesQueSeRepite++;
+                }
+            }
+            if (vecesQueSeRepite > maxNumRepeticiones) {
+                moda = numericalFields[i];
+                maxNumRepeticiones = vecesQueSeRepite;
+            }
+        }
+
+        System.out.println("La moda es " + moda + " se repitio " + maxNumRepeticiones + " veces");
+
+        System.out.println("Tiempo transcurrido para calcular la moda : " + (System.nanoTime() - timeSpent));
+    }
+
+    void calcularPromedio(int fieldPos) {
+        Long timeSpent = System.nanoTime();
+        
+        int[] numericalFields = getNumericalField(fieldPos);
+        int promedio;
+        int sumaTotal = numericalFields[0];
+
+        for (int i = 1; i < numericalFields.length; i++) {
+            sumaTotal += numericalFields[i];
+        }
+
+        promedio = sumaTotal / archivo.getLines();
+
+        System.out.println("El promedio total del campo es " + promedio);
+        System.out.println("Tiempo transcurrido para calcular el promedio : " + (System.nanoTime() - timeSpent));
     }
 
     void showResults(int pos, String[] lines) {

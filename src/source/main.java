@@ -103,7 +103,10 @@ public class main {
                         } else if (string || integer) {
                             // En caso de que el dato no sea de la longitud de 
                             // los campos, se retorna que el valor no fue encontrado
+                            System.out.println(data.length());
+                            System.out.println(fieldSize);
                             if (data.length() == fieldSize) {
+                                System.out.println("!!!!");
                                 timeSpent = System.nanoTime();
                                 while (pos != -1) {
                                     
@@ -158,9 +161,20 @@ public class main {
                     }
                     break;
                 case 3:
+                    System.out.println("Digite el numero de la posición del campo a seleccionar");
+                    controller.mostrarCamposNumericos();
+                    int campoElegido = scanner.nextInt();
                     
+                    controller.calcularValorMinimo(campoElegido);
+                    controller.calcularValorMaximo(campoElegido);                 
                     break;
                 case 4:
+                    System.out.println("Digite el numero de la posición del campo a seleccionar");
+                    controller.mostrarCamposNumericos();
+                    campoElegido = scanner.nextInt();
+                    
+                    controller.calcularModa(campoElegido);
+                    controller.calcularPromedio(campoElegido);
                     break;
                 case 5:
                     System.out.println("Saliendo del sistema...");
