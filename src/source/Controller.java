@@ -1,11 +1,8 @@
 package source;
 
-import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Controller {
 
@@ -15,12 +12,17 @@ public class Controller {
         this.archivo = archivo;
     }
 
-    void generateRecords(int cantRegistros, int cantCampos, int longCampos) {
+    void generateRecords(int cantRegistros, int cantCampos) {
         /**
          * Genera n cantidad de registros al azar, con k cantidad de campos y
          * cada campo con longitud L.
          */
         String line;
+
+        int[] dataType = new int[cantCampos];
+        int[] dataSize = new int[cantCampos];
+
+        Scanner scanner = new Scanner(System.in);
 
         String[] records = new String[cantRegistros];
         String[] pastRecords = archivo.readFile();
@@ -36,16 +38,31 @@ public class Controller {
             records[i] = pastRecords[i];
         }
 
+        for (int i = 0; i < cantCampos; i++) {
+            System.out.println("Digite la longitud para el campo " + (i + 1));
+            dataSize[i] = scanner.nextInt();
+            System.out.println("Digite el numero indicado para el tipo de campo");
+            System.out.println("1) numerico");
+            System.out.println("2) alfabetico");
+            int temp = scanner.nextInt();
+            if(!(temp < 1) || !(temp > 2)){
+                dataType[i] = scanner.nextInt();
+            }
+            
+
+        }
+
         for (int i = 0; i < cantRegistros; i++) {
             line = generateKey().toString();
             keys[i] = new BigInteger(line);
 
             for (int j = 0; j < cantCampos; j++) {
-                if (j % 2 == 0) {
-                    line = line + ";" + generateRandomInteger(longCampos);
-                } else {
-                    line = line + ";" + generateRandomCharacters(longCampos);
+                if (dataType[j] == 1) {
+                    line = line + ";" + generateRandomInteger(dataSize[j]);
+                } else if (dataType[j] == 2) {
+                    line = line + ";" + generateRandomCharacters(dataSize[j]);
                 }
+
             }
             records[i] = line;
         }
@@ -132,19 +149,21 @@ public class Controller {
         return true;
     }
 
-    int searchString(String arr[], String value) {
+    int searchString(String arr[], String value, int pos) {
         /**
          * Busca el dato dado por medio de una busqueda linear
          */
-        int n = arr.length;
+        String field;
 
-        for (int i = 0; i < n; i++) {
-            if (arr[i].contains(value)) {
+        for (int i = 0; i < arr.length; i++) {
+            field = arr[i].split(";")[pos];
+            if (field.equals(value)) {
                 return i;
             }
-
         }
+
         return -1;
+
     }
 
     int searchKey(BigInteger arr[], int l, int r, BigInteger x) {
@@ -178,11 +197,16 @@ public class Controller {
         /**
          * Obtiene los campos numericos del archivo.
          */
-        System.out.println("La posición de los campos numericos disponibles son:");
-        for (int i = 0; i < getNumberOfFields(); i++) {
-            if (i % 2 == 0) {
-                System.out.print(i + 1 + ", ");
+        String[] lines = archivo.readFile();
+        String[] temp = lines[0].split(";");
+        for (int j = 1; j <= temp.length; j++) {
+            try {
+                Integer.valueOf(temp[j]);
+                System.out.print(j + ",");
+            } catch (Exception e) {
+
             }
+
         }
         System.out.println("");
     }
@@ -263,7 +287,7 @@ public class Controller {
 
     void calcularPromedio(int fieldPos) {
         Long timeSpent = System.nanoTime();
-        
+
         int[] numericalFields = getNumericalField(fieldPos);
         int promedio;
         int sumaTotal = numericalFields[0];
@@ -297,13 +321,9 @@ public class Controller {
         return splitRecords.length - 1;
     }
 
-    int getFieldSize() {
-        /**
-         * Retorna el tamaño de un campo
-         */
-        String records = archivo.readFile()[0];
-        String[] splitRecords = records.split(";");
-        return splitRecords[1].length();
+    int getFieldSize(int pos) {
+        String[] lines = archivo.readFile()[0].split(";");
+        return lines[pos].length();
     }
 
 }

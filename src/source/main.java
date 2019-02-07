@@ -41,91 +41,81 @@ public class main {
                         System.out.println("Indique la cantidad de campos deseados");
                         cantCampos = scanner.nextInt();
 
-                        System.out.println("Indique la longitud de los campos");
-                        longCampos = scanner.nextInt();
-
-                        controller.generateRecords(cantRegistros, cantCampos, longCampos);
+                        controller.generateRecords(cantRegistros, cantCampos);
                     } else {
                         // En caso de que exista, se toman la longitud de los
                         // campos anteriores y la cantidad de estos para generar
                         // de manera random un nuevo registro
                         System.out.println("Indique la cantidad de registros deseados");
                         cantRegistros = scanner.nextInt();
-                        controller.generateRecords(cantRegistros, controller.getNumberOfFields(), controller.getFieldSize());
+                        controller.generateRecords(cantRegistros, controller.getNumberOfFields());
                     }
                     break;
                 case 2:
-                    if (archivo.exists()){
-                        
-                        boolean bigint = false, integer = false, string = false, results = false;
-                        int fieldSize = controller.getFieldSize();
+                    if (archivo.exists()) {
+                        int pos = 0;
 
-                        System.out.println("Digite el dato a buscar");
-                        data = scanner.next();
+                        boolean results = false;
 
-                        // Se verifica por medio de un try si el dato puede
-                        // transformarse en un bigInteger o en un int para poder
-                        // diferencias las llaves de los datos
-                        try {
-                            Integer.valueOf(data);
-                            integer = true;
-
-                        } catch (Exception e) {
-
-                            try {
-                                BigInteger a = new BigInteger(data);
-                                bigint = true;
-                            } catch (Exception ex) {
-                                string = true;
-                            }
-
-                        }
+                        Long timeSpent;
 
                         String[] lines = archivo.readFile();
 
-                        int pos = 0;
-                        Long timeSpent;
-                        if (bigint) {
+                        BigInteger bigData;
 
-                            BigInteger[] keys = archivo.getKeys();
-                            timeSpent = System.nanoTime();
-                            
-                            pos = controller.searchKey(keys, 0, keys.length - 1, new BigInteger(data));
-                            
-                            System.out.println("Tiempo transcurrido para encontrar la llave unica: " + (System.nanoTime() - timeSpent));
-                            
-                            if (pos != -1) 
-                                controller.showResults(pos, lines);
-                            else if (!results && pos == -1) 
-                                System.out.println("El dato no fue encontrado");
-                            
+                        System.out.println("Digite la opcion por la cual quiere buscar: ");
+                        System.out.println("1) Llave única");
+                        System.out.println("2) Dato");
+                        op = scanner.nextInt();
 
-                        } else if (string || integer) {
-                            // En caso de que el dato no sea de la longitud de 
-                            // los campos, se retorna que el valor no fue encontrado
-                            System.out.println(data.length());
-                            System.out.println(fieldSize);
-                            if (data.length() == fieldSize) {
-                                System.out.println("!!!!");
+                        switch (op) {
+                            case 1:
+                                System.out.println("Digite la llave a buscar");
+                                bigData = scanner.nextBigInteger();
+
+                                BigInteger[] keys = archivo.getKeys();
                                 timeSpent = System.nanoTime();
-                                while (pos != -1) {
+
+                                pos = controller.searchKey(keys, 0, keys.length - 1, bigData);
+
+                                System.out.println("Tiempo transcurrido para encontrar la llave unica: " + (System.nanoTime() - timeSpent));
+
+                                if (pos != -1) {
+                                    controller.showResults(pos, lines);
+                                } else if (!results && pos == -1) {
+                                    System.out.println("El dato no fue encontrado");
+                                }
+                                break;
+                            case 2:
+                                System.out.println("Digite la posición del campo en el que se encuentra el dato (del 1 al " + (lines[0].split(";").length - 1) + ")");
+                                int dataPos = scanner.nextInt();
+                                String[] tempLines = lines[0].split(";");
+                                if (dataPos > tempLines.length || dataPos < 0) {
+                                    System.out.println("El dato debe pertenecer a un campo");
+                                } else {
+                                    int fieldSize = controller.getFieldSize(dataPos);
+                                    System.out.println("Digite el dato a buscar");
+                                    data = scanner.next();
                                     
-                                    pos = controller.searchString(lines, data);
-                                    
-                                    if (pos != -1) {
-                                        controller.showResults(pos, lines);
-                                        lines[pos] = "";
-                                        results = true;
-                                    } else if (!results && pos == -1) {
+                                    if (data.length() == fieldSize) {
+                                        timeSpent = System.nanoTime();
+                                        while (pos != -1) {
+                                            pos = controller.searchString(lines, data, dataPos);
+                                            if (pos != -1) {
+                                                controller.showResults(pos, lines);
+                                                lines[pos] = "!;!;!";
+                                                results = true;
+                                            } else if (!results && pos == -1) {
+                                                System.out.println("El dato no fue encontrado");
+                                            }
+                                        }
+                                        System.out.println("Tiempo transcurrido para encontras los datos: " + (System.nanoTime() - timeSpent));
+                                    } else {
                                         System.out.println("El dato no fue encontrado");
                                     }
                                 }
-                                System.out.println("Tiempo transcurrido para encontras los datos: " + (System.nanoTime() - timeSpent));
-                            } else {
-                                System.out.println("El dato no fue encontrado");
-                            }
+                                break;
                         }
-
                     } else {
                         while (chooseOp) {
                             // Si el archivo no existe se da la opcion de crearlo
@@ -139,12 +129,7 @@ public class main {
                                     System.out.println("Indique la cantidad de registros deseados");
                                     cantRegistros = scanner.nextInt();
 
-                                    System.out.println("Indique la cantidad de campos deseados");
-                                    cantCampos = scanner.nextInt();
-
-                                    System.out.println("Indique la longitud de los campos");
-                                    longCampos = scanner.nextInt();
-                                    controller.generateRecords(cantRegistros, cantCampos, longCampos);
+                                    controller.generateRecords(cantRegistros, controller.getNumberOfFields());
 
                                     chooseOp = false;
                                     break;
@@ -162,17 +147,19 @@ public class main {
                     break;
                 case 3:
                     System.out.println("Digite el numero de la posición del campo a seleccionar");
+                    System.out.println("Campos numericos:");
                     controller.mostrarCamposNumericos();
                     int campoElegido = scanner.nextInt();
-                    
+
                     controller.calcularValorMinimo(campoElegido);
-                    controller.calcularValorMaximo(campoElegido);                 
+                    controller.calcularValorMaximo(campoElegido);
                     break;
                 case 4:
                     System.out.println("Digite el numero de la posición del campo a seleccionar");
+                    System.out.println("Campos numericos:");
                     controller.mostrarCamposNumericos();
                     campoElegido = scanner.nextInt();
-                    
+
                     controller.calcularModa(campoElegido);
                     controller.calcularPromedio(campoElegido);
                     break;
