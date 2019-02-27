@@ -1,12 +1,13 @@
 package source;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Random;
 import java.util.Scanner;
 
 public class Controller {
 
-    private Archivo archivo;
+    private final Archivo archivo;
 
     public Controller(Archivo archivo) {
         this.archivo = archivo;
@@ -46,7 +47,7 @@ public class Controller {
             System.out.println("2) alfabetico");
             int temp = scanner.nextInt();
             if(!(temp < 1) || !(temp > 2)){
-                dataType[i] = scanner.nextInt();
+                dataType[i] = temp;
             }
             
 
@@ -58,7 +59,7 @@ public class Controller {
 
             for (int j = 0; j < cantCampos; j++) {
                 if (dataType[j] == 1) {
-                    line = line + ";" + generateRandomInteger(dataSize[j]);
+                    line = line + ";" + generateRandomNumber(dataSize[j]);
                 } else if (dataType[j] == 2) {
                     line = line + ";" + generateRandomCharacters(dataSize[j]);
                 }
@@ -71,17 +72,23 @@ public class Controller {
         archivo.writeToFile(records);
     }
 
-    int generateRandomInteger(int longCampo) {
+    String generateRandomNumber(int longCampo) {
         /**
          * Genera una combinación de numeros random dependiendo de la longitud
          * del campo.
          */
-        Random rnd = new Random();
+        String characters = "";
+        int rnd;
+        String alphabet = "0123456789";
+        int cont = 0;
 
-        int longitud = (int) Math.pow(10, longCampo - 1);
-        int integer = rnd.nextInt(longitud * 9) + longitud;
+        while (longCampo > cont) {
+            rnd = (int) (Math.random() * 9);
+            characters = characters + alphabet.charAt(rnd);
+            cont++;
+        }
 
-        return integer;
+        return characters;
     }
 
     String generateRandomCharacters(int longCampo) {
@@ -201,7 +208,7 @@ public class Controller {
         String[] temp = lines[0].split(";");
         for (int j = 1; j <= temp.length; j++) {
             try {
-                Integer.valueOf(temp[j]);
+                new BigInteger(temp[j]);
                 System.out.print(j + ",");
             } catch (Exception e) {
 
@@ -211,15 +218,15 @@ public class Controller {
         System.out.println("");
     }
 
-    int[] getNumericalField(int fieldPos) {
-        int[] numericalFields = new int[archivo.getLines()];
+    BigInteger[] getNumericalField(int fieldPos) {
+        BigInteger[] numericalFields = new BigInteger[archivo.getLines()];
         String[] registros = archivo.readFile();
 
         for (int i = 0; i < registros.length; i++) {
             String currentLine = registros[i];
             String[] dividedLine = currentLine.split(";");
 
-            numericalFields[i] = Integer.valueOf(dividedLine[fieldPos]);
+            numericalFields[i] = new BigInteger(dividedLine[fieldPos]);
         }
 
         return numericalFields;
@@ -228,16 +235,16 @@ public class Controller {
     void calcularValorMaximo(int fieldPos) {
         Long timeSpent = System.nanoTime();
 
-        int[] numericalFields = getNumericalField(fieldPos);
-        int maxValue = numericalFields[0];
+        BigInteger[] numericalFields = getNumericalField(fieldPos);
+        BigInteger maxValue = numericalFields[0];
 
         for (int i = 1; i < numericalFields.length; i++) {
-            if (numericalFields[i] > maxValue) {
+            if (numericalFields[i].compareTo(maxValue) == 1) {
                 maxValue = numericalFields[i];
             }
         }
 
-        System.out.println("El valor maximo es " + maxValue);
+        System.out.println("El valor maximo es " + maxValue.toString());
 
         System.out.println("Tiempo transcurrido para generar el valor maximo es : " + (System.nanoTime() - timeSpent));
 
@@ -246,16 +253,16 @@ public class Controller {
     void calcularValorMinimo(int fieldPos) {
         Long timeSpent = System.nanoTime();
 
-        int[] numericalFields = getNumericalField(fieldPos);
-        int minValue = numericalFields[0];
+        BigInteger[] numericalFields = getNumericalField(fieldPos);
+        BigInteger minValue = numericalFields[0];
 
         for (int i = 1; i < numericalFields.length; i++) {
-            if (numericalFields[i] < minValue) {
+            if (numericalFields[i].compareTo(minValue) == -1) {
                 minValue = numericalFields[i];
             }
         }
 
-        System.out.println("El valor minimo es " + minValue);
+        System.out.println("El valor minimo es " + minValue.toString());
 
         System.out.println("Tiempo transcurrido para generar el valor minimo es : " + (System.nanoTime() - timeSpent));
     }
@@ -263,8 +270,8 @@ public class Controller {
     void calcularModa(int fieldPos) {
         Long timeSpent = System.nanoTime();
 
-        int[] numericalFields = getNumericalField(fieldPos);
-        int moda = 0;
+        BigInteger[] numericalFields = getNumericalField(fieldPos);
+        BigInteger moda = BigInteger.ZERO;
         int maxNumRepeticiones = 0;
 
         for (int i = 0; i < numericalFields.length; i++) {
@@ -280,7 +287,7 @@ public class Controller {
             }
         }
 
-        System.out.println("La moda es " + moda + " se repitio " + maxNumRepeticiones + " veces");
+        System.out.println("La moda es " + moda.toString() + " se repitio " + maxNumRepeticiones + " veces");
 
         System.out.println("Tiempo transcurrido para calcular la moda : " + (System.nanoTime() - timeSpent));
     }
@@ -288,17 +295,17 @@ public class Controller {
     void calcularPromedio(int fieldPos) {
         Long timeSpent = System.nanoTime();
 
-        int[] numericalFields = getNumericalField(fieldPos);
-        int promedio;
-        int sumaTotal = numericalFields[0];
+        BigInteger[] numericalFields = getNumericalField(fieldPos);
+        BigDecimal promedio;
+        BigDecimal sumaTotal = new BigDecimal(numericalFields[0]);
 
         for (int i = 1; i < numericalFields.length; i++) {
-            sumaTotal += numericalFields[i];
+            sumaTotal.add(new BigDecimal(numericalFields[i]));
         }
 
-        promedio = sumaTotal / archivo.getLines();
+        promedio = sumaTotal.divide(new BigDecimal(archivo.getLines()));
 
-        System.out.println("El promedio total del campo es " + promedio);
+        System.out.println("El promedio total del campo es " + promedio.toString());
         System.out.println("Tiempo transcurrido para calcular el promedio : " + (System.nanoTime() - timeSpent));
     }
 
